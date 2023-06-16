@@ -53,7 +53,7 @@ public class Service implements Serializable {
     }
 
     public boolean isRunning() {
-        if (type.equals("dummy")) return false;
+        if (type.startsWith("dummy")) return false;
 
         if (thread == null) {
             return false;
@@ -68,7 +68,7 @@ public class Service implements Serializable {
     }
 
     public Object loadObject() {
-        if (type.equals("dummy")) return null;
+        if (type.startsWith("dummy")) return null;
         try {
             Class<?> loadedClass = null;
             if (serviceFile != null) {
@@ -90,7 +90,7 @@ public class Service implements Serializable {
 
     public boolean start() {
 
-        if (type.equals("dummy")) return true;
+        if (type.startsWith("dummy")) return true;
 
         // Kill process first
         kill();
@@ -123,7 +123,7 @@ public class Service implements Serializable {
 
     public boolean startJoin() {
 
-        if (type.equals("dummy")) return true;
+        if (type.startsWith("dummy")) return true;
 
         boolean success = start();
         if (!success) return false;
