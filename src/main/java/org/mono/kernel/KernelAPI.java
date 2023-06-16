@@ -1,10 +1,13 @@
 package org.mono.kernel;
 
+import me.hysong.libhyextended.Utils;
 import org.mono.kernel.io.ScreenOutput;
 import org.mono.kernel.kernel.KernelInfo;
+import org.mono.kernel.kernel.ProcLauncher;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class KernelAPI {
 
@@ -83,13 +86,13 @@ public class KernelAPI {
                         String id = command.substring("IO:".length());
                         switch (id) {
                             case "0":
-                                socket.getOutputStream().write(ServicesManager.getServiceByName("io_stdin").getClassName().getBytes());
+                                socket.getOutputStream().write(ServicesManager.getServiceByType("io_stdin").getClassName().getBytes());
                                 break;
                             case "1":
-                                socket.getOutputStream().write(ServicesManager.getServiceByName("io_stdout").getClassName().getBytes());
+                                socket.getOutputStream().write(ServicesManager.getServiceByType("io_stdout").getClassName().getBytes());
                                 break;
                             case "2":
-                                socket.getOutputStream().write(ServicesManager.getServiceByName("io_stderr").getClassName().getBytes());
+                                socket.getOutputStream().write(ServicesManager.getServiceByType("io_stderr").getClassName().getBytes());
                                 break;
                             default:
                                 socket.getOutputStream().write("".getBytes());
