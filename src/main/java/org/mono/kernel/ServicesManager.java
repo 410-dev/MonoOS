@@ -80,7 +80,8 @@ public class ServicesManager {
     }
 
     protected static void stopServices(boolean verbose) {
-        for (Service service : services) {
+        for (int i = services.size() - 1; i >= 0; i--) {
+            Service service = services.get(i);
             if (verbose) ScreenOutput.println("Stopping service " + service.getName() + "...");
             service.kill();
         }
