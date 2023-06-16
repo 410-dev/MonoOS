@@ -1,52 +1,98 @@
 package org.mono.kernel;
 
-import me.hysong.libhyextended.utils.ObjectIO;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import me.hysong.libhyextended.Utils;
 import org.mono.kernel.io.ScreenOutput;
+import org.mono.userspace.Shell;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+
+// TODO Handle unexpected service termination
 public class ServicesManager {
 
     protected static ArrayList<Service> services = new ArrayList<>();
     private static int pidCounter = 0;
 
-    public static int registerService(File serviceMetaFile) throws IOException, ClassNotFoundException {
+    public static int registerService(File serviceMetaFile, boolean verbose) {
+        if (verbose) ScreenOutput.println("Registering service " + serviceMetaFile.getName() + "...");
         if (serviceMetaFile.isFile()) {
-            ScreenOutput.println("Registering service " + serviceMetaFile.getName() + "...");
-            Service service = (Service) ObjectIO.read(serviceMetaFile);
-            pidCounter++;
-            service.setPID(pidCounter);
+            Service service = null;
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(serviceMetaFile));
+                StringBuilder builder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
+                }
+                reader.close();
+                JsonObject serviceMeta = JsonParser.parseString(builder.toString()).getAsJsonObject();
+                service = new Service(
+                        serviceMeta.has("name") ? serviceMeta.get("name").getAsString() : "generic-service",
+                        serviceMeta.has("type") ? serviceMeta.get("type").getAsString() : "service",
+                        serviceMeta.has("description") ? serviceMeta.get("description").getAsString() : "Generic service",
+                        serviceMeta.get("className").getAsString(), // This field is the only required field for json data.
+                        serviceMeta.has("methodName") ? serviceMeta.get("methodName").getAsString() : "main",
+                        Utils.splitStringBySpaceWithQuotationConsideration(serviceMeta.get("arguments").getAsString()),
+                        serviceMeta.has ("file") ? new File(serviceMetaFile.getParent(), serviceMeta.get("file").getAsString()) : new File(serviceMetaFile.getParent(), serviceMetaFile.getName().substring(0, serviceMetaFile.getName().lastIndexOf(".")) + ".jar"),
+                        serviceMeta.has("isKernelService") && serviceMeta.get("isKernelService").getAsBoolean(),
+                        serviceMeta.has("enforceSync") && serviceMeta.get("enforceSync").getAsBoolean(),
+                        serviceMeta.has("requireAlive") && serviceMeta.get("requireAlive").getAsBoolean()
+                    );
+
+                pidCounter++;
+                service.setPID(pidCounter);
+
+                // If kernel service, unload the old one if the same pid exists
+                if (service.isKernelService()) {
+                    Service oldService = getServiceByType(service.getType());
+                    if (oldService != null) {
+                        if (verbose) ScreenOutput.println("Unloading old kernel service " + oldService.getName() + "...");
+                        unloadService(oldService, verbose);
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return -1;
+            }
+
+
             services.add(service);
+            if (verbose) ScreenOutput.println("Service " + service.getName() + " (" + service.getClassName() + ") registered successfully.");
             return pidCounter;
         }else{
             throw new RuntimeException("Service meta file is not a file!");
         }
     }
 
-    public static int registerService(Service service){
-        ScreenOutput.println("Registering service " + service.getName() + "...");
-        pidCounter++;
+    public static int registerService(Service service, boolean verbose){
+        if (verbose) ScreenOutput.println("Registering service " + service.getName() + "...");
+        pidCounter+=1;
         service.setPID(pidCounter);
         services.add(service);
         return pidCounter;
     }
 
-    protected static void stopServices() {
+    protected static void stopServices(boolean verbose) {
         for (Service service : services) {
-            ScreenOutput.println("Stopping service " + service.getName() + "...");
+            if (verbose) ScreenOutput.println("Stopping service " + service.getName() + "...");
             service.kill();
         }
     }
 
-    protected static void startServices() {
+    protected static void startServices(boolean verbose) {
         for (Service service : services) {
-            ScreenOutput.println("Starting service " + service.getName() + "...");
+            if (verbose) ScreenOutput.println("Starting service " + service.getName() + "...");
             if (service.start()) {
-                ScreenOutput.println("Service " + service.getName() + " started successfully.");
+                if (verbose) ScreenOutput.println("Service " + service.getName() + " started successfully.");
             } else {
-                ScreenOutput.println("Service " + service.getName() + " could not be started.");
+                if (verbose) ScreenOutput.println("Service " + service.getName() + " could not be started.");
             }
         }
     }
@@ -54,6 +100,15 @@ public class ServicesManager {
     public static Service getServiceByName(String name){
         for (Service service : services) {
             if(service.getName().equals(name)){
+                return service;
+            }
+        }
+        return null;
+    }
+
+    public static Service getServiceByType(String typeID) {
+        for (Service service : services) {
+            if (service.getType().equals(typeID)) {
                 return service;
             }
         }
@@ -69,89 +124,107 @@ public class ServicesManager {
         return null;
     }
 
-    public static boolean unloadService(String name){
-        return unloadService(getServiceByName(name));
+    public static boolean unloadServiceByName(String name, boolean verbose){
+        return unloadService(getServiceByName(name), verbose);
     }
 
-    public static boolean unloadService(int pid){
-        return unloadService(getServiceByPID(pid));
+    public static boolean unloadServiceByType(String type, boolean verbose){
+        return unloadService(getServiceByType(type), verbose);
     }
 
-    private static boolean unloadService(Service s) {
+    public static boolean unloadServiceByPID(int pid, boolean verbose){
+        return unloadService(getServiceByPID(pid), verbose);
+    }
+
+    private static boolean unloadService(Service s, boolean verbose) {
         if(s != null){
-            ScreenOutput.println("Unloading service " + s.getName() + "...");
             if (s.isRunning()) {
-                ScreenOutput.println("Failed to unload service " + s.getName() + ": service is still running.");
+                if (verbose) ScreenOutput.println("Failed to unload service " + s.getName() + ": service is still running.");
                 return false;
             }
             services.remove(s);
             return true;
         }
-        ScreenOutput.println("Failed to unload service: service not found.");
+        if (verbose) ScreenOutput.println("Failed to unload service: service not found.");
         return false;
     }
 
-    public static void killService(String name){
+    public static void killService(String name, boolean verbose){
         Service s = getServiceByName(name);
         if(s != null){
-            ScreenOutput.println("Killing service " + s.getName() + "...");
+            if (verbose) ScreenOutput.println("Killing service " + s.getName() + "...");
             s.kill();
+        }else {
+            if (verbose) ScreenOutput.println("Service not found.");
         }
     }
 
-    public static void killService(int pid){
+    public static void killService(int pid, boolean verbose){
         Service s = getServiceByPID(pid);
         if(s != null){
-            ScreenOutput.println("Killing service " + s.getName() + "...");
+            if (verbose) ScreenOutput.println("Killing service " + s.getName() + "...");
             s.kill();
+        }else {
+            if (verbose) ScreenOutput.println("Service not found.");
         }
     }
 
-    public static void startAsyncService(String name){
+    public static void startAsyncService(String name, boolean verbose){
         Service s = getServiceByName(name);
         if(s != null){
-            ScreenOutput.println("Starting service " + s.getName() + "...");
+            if (verbose) ScreenOutput.println("Starting service " + s.getName() + "...");
             if (s.start()) {
-                ScreenOutput.println("Service " + s.getName() + " started successfully.");
+                if (verbose) ScreenOutput.println("Service " + s.getName() + " started successfully.");
             } else {
-                ScreenOutput.println("Service " + s.getName() + " could not be started.");
+                if (verbose) ScreenOutput.println("Service " + s.getName() + " could not be started.");
             }
+        }else {
+            if (verbose) ScreenOutput.println("Service not found.");
         }
     }
 
-    public static void startAsyncService(int pid){
+    public static void startAsyncService(int pid, boolean verbose){
         Service s = getServiceByPID(pid);
         if(s != null){
-            ScreenOutput.println("Starting service " + s.getName() + "...");
+            if (verbose) ScreenOutput.println("Starting service " + s.getName() + "...");
             if (s.start()) {
-                ScreenOutput.println("Service " + s.getName() + " started successfully.");
+                if (verbose) ScreenOutput.println("Service " + s.getName() + " started successfully.");
             } else {
-                ScreenOutput.println("Service " + s.getName() + " could not be started.");
+                if (verbose) ScreenOutput.println("Service " + s.getName() + " could not be started.");
             }
+        }else {
+            if (verbose) ScreenOutput.println("Service not found.");
         }
     }
 
-    public static void startSyncService(String name){
+    public static void startSyncService(String name, boolean verbose){
         Service s = getServiceByName(name);
         if(s != null){
-            ScreenOutput.println("Starting service " + s.getName() + "...");
+            if (verbose) ScreenOutput.println("Starting service " + s.getName() + "...");
             if (s.startJoin()) {
-                ScreenOutput.println("Service task of " + s.getName() + " ended successfully.");
+                if (verbose) ScreenOutput.println("Service task of " + s.getName() + " ended successfully.");
             } else {
-                ScreenOutput.println("Service task of " + s.getName() + " ended with an error.");
+                if (verbose) ScreenOutput.println("Service task of " + s.getName() + " ended with an error.");
             }
+        }else {
+            if (verbose) ScreenOutput.println("Service not found.");
         }
     }
 
-    public static void startSyncService(int pid){
+    public static int startSyncService(int pid, boolean verbose){
         Service s = getServiceByPID(pid);
         if(s != null){
-            ScreenOutput.println("Starting service " + s.getName() + "...");
+            if (verbose) ScreenOutput.println("Starting service " + s.getName() + "...");
             if (s.startJoin()) {
-                ScreenOutput.println("Service task of " + s.getName() + " ended successfully.");
+                if (verbose) ScreenOutput.println("Service task of " + s.getName() + " ended successfully.");
+                return 0;
             } else {
-                ScreenOutput.println("Service task of " + s.getName() + " ended with an error.");
+                if (verbose) ScreenOutput.println("Service task of " + s.getName() + " ended with an error.");
+                return 1;
             }
+        } else {
+            if (verbose) ScreenOutput.println("Service not found.");
         }
+        return 2;
     }
 }
