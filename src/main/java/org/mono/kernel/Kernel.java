@@ -20,16 +20,26 @@ public class Kernel {
         kernelAPIThread.start();
 
         // Register basic services
-        Service shell = new Service("Basic Shell", "shell", "Internal linux-like shell", "org.mono.userspace.Shell", "main", null, null, true, false, true);
-        Service basicUI = new Service("BasicShellUI", "ui","Internal fallback UI with direct kernel communication", "org.mono.userspace.BasicShellUI", "main", null, null, true, false, true);
+        Service kernel = new Service("Mono Basis Framework", "dummy-kern", "Kernel that drives MonoOS", "", "", null, null, true, true, true);
+        Service nvram = new Service("On-FS NVRAM", "dummy-nvram", "NVRAM manager", "", "", null, null, true, true, true);
+        Service init = new Service("ServicesManager", "dummy-init", "Process launching utility", "", "", null, null, true, true, true);
+        Service framework = new Service("ServicesManager", "dummy-framework", "Process management utility", "", "", null, null, true, true, true);
         Service io_stdout = new Service("BasicIO_StandardOut", "io_stdout","Standard output", "org.mono.kernel.io.ScreenOutput", "main", null, null, true, false, false);
-        Service io_stdin = new Service("BasicIO_StandardIn", "io_stdin","Standard input", "org.mono.kernel.io.KeyboardStdinAdapter", "main", null, null, true, false, false);
         Service io_stderr = new Service("BasicIO_StandardErr", "io_stderr","Standard error", "org.mono.kernel.io.ScreenOutput", "main", null, null, true, false, false);
+        Service io_stdin = new Service("BasicIO_StandardIn", "io_stdin","Standard input", "org.mono.kernel.io.KeyboardStdinAdapter", "main", null, null, true, false, false);
+        Service environment = new Service("Environment", "dummy-env", "Environment variables and designated paths", "", "", null, null, true, true, true);
+        Service shell = new Service("Shell", "shell", "Internal linux-like shell", "org.mono.userspace.Shell", "main", null, null, true, false, true);
+        Service basicUI = new Service("BasicShellUI", "ui","Internal fallback UI with direct kernel communication", "org.mono.userspace.BasicShellUI", "main", null, null, true, false, true);
+        ServicesManager.registerService(kernel, verbose);
+        ServicesManager.registerService(nvram, verbose);
+        ServicesManager.registerService(init, verbose);
+        ServicesManager.registerService(framework, verbose);
+        ServicesManager.registerService(io_stdout, verbose);
+        ServicesManager.registerService(io_stderr, verbose);
+        ServicesManager.registerService(io_stdin, verbose);
+        ServicesManager.registerService(environment, verbose);
         ServicesManager.registerService(shell, verbose);
         ServicesManager.registerService(basicUI, verbose);
-        ServicesManager.registerService(io_stdout, verbose);
-        ServicesManager.registerService(io_stdin, verbose);
-        ServicesManager.registerService(io_stderr, verbose);
 
         // Load all services in root/sys/services
         // The file name shouldn't start with dot, and the file name should end with .service
