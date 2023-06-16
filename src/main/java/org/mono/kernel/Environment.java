@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Environment {
-    public static final String KERNEL_LINKS = "/sys/kernel/links";
+    public static final String KERNEL_EXTENSIONS = "/sys/kernel/extensions";
     public static final String KERNEL_SERVICES = "/sys/kernel/services";
 
 
