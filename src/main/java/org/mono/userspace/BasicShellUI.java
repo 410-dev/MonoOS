@@ -1,8 +1,11 @@
 package org.mono.userspace;
 
+import me.hysong.libhyextended.utils.StackTraceStringifier;
+import org.mono.kernel.ServicesManager;
 import org.mono.kernel.io.ScreenOutput;
 
 import java.net.Socket;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class BasicShellUI {
@@ -10,12 +13,13 @@ public class BasicShellUI {
     public BasicShellUI(){}
 
     public Integer main(String[] args) {
-        Scanner input = new Scanner(System.in);
         try (Socket socket = new Socket("localhost", 65532)) {
             Shell.println("Connected to shell...");
+            String response = "0";
             while (true) {
-                Shell.print("BasicShellUI >>> ");
-                String command = input.nextLine();
+                String command = Shell.readLine("BasicShellUI [" + response + "] >>> ");
+
+                if (command == null || command.isEmpty()) continue;
 
                 // Send command to localhost:65530 socket without format
                 socket.getOutputStream().write(command.getBytes());
@@ -25,15 +29,22 @@ public class BasicShellUI {
                 byte[] buffer = new byte[1024];
                 int read = socket.getInputStream().read(buffer);
                 if (read > 0) {
-                    String response = new String(buffer, 0, read);
-                    Shell.println("Process exit: " + response);
+                    response = new String(buffer, 0, read);
                 }
             }
+        } catch (NoSuchElementException e) {
+            try {
+                Shell.println("No such element exception, waiting...");
+                Thread.sleep(1000);
+            }catch (Exception ex) {
+                ex.printStackTrace();
+            }
         } catch (Exception e) {
-            Shell.println("Failed!\n");
-            Shell.println("Error: " + e.getMessage() + "\n");
+            Shell.println("Failed!");
+            Shell.println("Error: " + StackTraceStringifier.stringify(e) + "\n");
             return 1;
         }
+        return 0;
     }
 
 }
