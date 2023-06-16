@@ -2,42 +2,43 @@ package org.mono.kernel;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import me.hysong.libhyextended.utils.StackTraceStringifier;
-import org.mono.kernel.io.ScreenOutput;
 
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
 
 @Getter(AccessLevel.PROTECTED)
 public class Service implements Serializable {
 
     private int pid;
     private final String name;
+    private final String type;
     private final String description;
     @Getter private final String className;
     private final String methodName;
     private final String[] arguments;
     private final File serviceFile;
     private final boolean isKernelService;
-    private final boolean enforceJoin;
+    private final boolean enforceSync;
+    private final boolean requireAlive;
     private String session;
     private Thread thread;
     private String stackTrace;
 
-    public Service(String name, String description, String className, String methodName, String[] arguments, File serviceFile, boolean isKernelService, boolean enforceJoin) {
+    public Service(String name, String type, String description, String className, String methodName, String[] arguments, File serviceFile, boolean isKernelService, boolean enforceSync, boolean requireAlive) {
         this.name = name;
+        this.type = type == null ? "service" : type;
         this.description = description;
         this.className = className;
         this.methodName = methodName == null ? "main" : methodName;
         this.arguments = arguments == null ? new String[]{} : arguments;
         this.serviceFile = serviceFile;
         this.isKernelService = isKernelService;
-        this.enforceJoin = enforceJoin;
+        this.enforceSync = enforceSync;
+        this.requireAlive = requireAlive;
         this.session = NVRAM.get("sys_session");
     }
 
@@ -46,7 +47,7 @@ public class Service implements Serializable {
         StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
         StackTraceElement e = stacktrace[2];//maybe this number needs to be corrected
         String classFullName = e.getClass().getPackageName() + "." + e.getClassName();
-        if (classFullName.equals("org.mono.kernel.ServicesManager")) {
+        if (classFullName.equals("java.lang.org.mono.kernel.ServicesManager")) {
             this.pid = pid;
         }
     }
@@ -104,7 +105,7 @@ public class Service implements Serializable {
             });
             thread.start();
 
-            if (enforceJoin) {
+            if (enforceSync) {
                 thread.join();
             }
         } catch (Exception e) {
@@ -125,6 +126,24 @@ public class Service implements Serializable {
             e.printStackTrace();
             stackTrace = StackTraceStringifier.stringify(e);
             return false;
+        }
+    }
+
+    public void suspend() throws InterruptedException {
+        if (isRunning()) {
+            thread.wait();
+        }
+    }
+
+    public void suspend(long millis) throws InterruptedException {
+        if (isRunning()) {
+            thread.wait(millis);
+        }
+    }
+
+    public void resume() {
+        if (isRunning()) {
+            thread.notify();
         }
     }
 }
