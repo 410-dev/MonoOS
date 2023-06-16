@@ -25,6 +25,11 @@ public class Boot {
             NVRAM.setSystemNVRAM((NVRAM) ObjectIO.read(new File(Objects.requireNonNull(NVRAM.getParameter(args, "--nvram")))));
         }
 
+        // Push boot arguments to nvram
+        for (String arg : args) {
+            NVRAM.set(arg);
+        }
+
         // Add session UID
         NVRAM.set("sys_session", String.valueOf(System.currentTimeMillis()));
 
