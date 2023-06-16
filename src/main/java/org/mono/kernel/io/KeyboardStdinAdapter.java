@@ -12,14 +12,14 @@ public class KeyboardStdinAdapter {
 
     public static String readLine() {
         Scanner input = new Scanner(System.in);
-        String line = input.nextLine();
-        input.close();
-        return line;
+        if (input.hasNextLine())
+            return input.nextLine();
+        return null;
     }
 
     public static String readLine(String prompt) {
         try {
-            Class.forName(ServicesManager.getServiceByName("io_stdout").getClassName()).getDeclaredMethod("print", String.class).invoke(null, prompt);
+            ServicesManager.getServiceByType("io_stdout").loadObject().getClass().getDeclaredMethod("print", String.class).invoke(null, prompt);
         }catch (Exception e) {
             e.printStackTrace();
         }
