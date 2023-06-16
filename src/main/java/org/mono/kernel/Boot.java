@@ -6,6 +6,7 @@ import org.mono.kernel.io.ScreenOutput;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 public class Boot {
@@ -13,7 +14,7 @@ public class Boot {
     // Boot arguments:
     // --nvram=<path to NVRAM file>
     // --root=<path to root directory>
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         // Load NVRAM
         // If the NVRAM file does not exist, create a new one in memory
