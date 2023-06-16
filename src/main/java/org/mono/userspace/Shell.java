@@ -1,6 +1,8 @@
 package org.mono.userspace;
 
-import org.mono.kernel.io.ScreenOutput;
+import me.hysong.libhyextended.Utils;
+import org.mono.kernel.ServicesManager;
+import org.mono.kernel.kernel.ProcLauncher;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -26,7 +28,7 @@ public class Shell {
                 if (read > 0) {
                     String command = new String(buffer, 0, read);
 
-                    String[] commandParts = commandSplit(command);
+                    String[] commandParts = Utils.splitStringBySpaceWithQuotationConsideration(command);
                     int processExitCode = 1;
 
                     // Send kernel to stop or restart
@@ -40,13 +42,13 @@ public class Shell {
 
                     // Find command in userspace.busybox package and execute it
                     // TODO: If not found, try finding from disk drive (.jar file) and execute it
-                    // TODO: Use kernel api to launch process
                     } else {
                         try {
                             String className = commandParts[0].substring(0, 1).toUpperCase() + commandParts[0].substring(1).toLowerCase();
                             Class<?> processClass = Class.forName("org.mono.userspace.busybox." + className);
-                            Object process = processClass.getDeclaredConstructor().newInstance();
-                            processExitCode = (Integer) processClass.getMethod("main", String[].class).invoke(process, (Object) Arrays.copyOfRange(commandParts, 1, commandParts.length));
+
+                            processExitCode = ProcLauncher.launch(commandParts[0], processClass.getName(), "_", Arrays.copyOfRange(commandParts, 1, commandParts.length), true);
+
                         } catch (ClassNotFoundException e) {
                             println("Unknown command: " + commandParts[0]);
                         }
@@ -58,33 +60,6 @@ public class Shell {
             e.printStackTrace();
         }
         return exitCode;
-    }
-
-    private String[] commandSplit(String command) {
-        // Command splitting. Treats double quotes or single quotes as a single argument.
-        // Example: "echo \"Hello World\"" -> ["echo", "Hello World"]
-        // Example: "echo 'Hello World'" -> ["echo", "Hello World"]
-        // Example: "echo Hello World" -> ["echo", "Hello", "World"]
-
-        // Regular expression to match quoted or non-quoted parts of the command
-        String regex = "\"([^\"]*)\"|'([^']*)'|\\S+";
-        List<String> arguments = new ArrayList<>();
-
-        // Use regex pattern to split the command into arguments
-        Matcher matcher = Pattern.compile(regex).matcher(command);
-        while (matcher.find()) {
-            // Add the matched group to the arguments list
-            String argument = matcher.group();
-            // Remove the surrounding quotes if present
-            if (argument.startsWith("\"") && argument.endsWith("\"") ||
-                    argument.startsWith("'") && argument.endsWith("'")) {
-                argument = argument.substring(1, argument.length() - 1);
-            }
-            arguments.add(argument);
-        }
-
-        // Convert the list to an array and return
-        return arguments.toArray(new String[0]);
     }
 
 
@@ -128,34 +103,39 @@ public class Shell {
         return null;
     }
 
-    private static Class<?> printerClass = null;
+    private static Object printerObject = null;
+    private static Object inputObject = null;
     public static void println(String s) {
-        if (printerClass == null) {
-            try {
-                printerClass = Class.forName(kernelAPI("IO:1"));
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+        if (printerObject == null) {
+            printerObject = ServicesManager.getServiceByType("io_stdout").loadObject();
         }
         try {
-            printerClass.getDeclaredMethod("println", String.class).invoke(null, s);
+            printerObject.getClass().getDeclaredMethod("println", String.class).invoke(null, s);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static void print(String s) {
-        if (printerClass == null) {
-            try {
-                printerClass = Class.forName(kernelAPI("IO:1"));
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+        if (printerObject == null) {
+            printerObject = ServicesManager.getServiceByType("io_stdout").loadObject();
         }
         try {
-            printerClass.getDeclaredMethod("print", String.class).invoke(null, s);
+            printerObject.getClass().getDeclaredMethod("print", String.class).invoke(null, s);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static String readLine(String prompt) {
+        if (inputObject == null) {
+            inputObject = ServicesManager.getServiceByType("io_stdin").loadObject();
+        }
+        try {
+            return (String) inputObject.getClass().getDeclaredMethod("readLine", String.class).invoke(null, prompt);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
