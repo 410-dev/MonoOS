@@ -60,6 +60,19 @@ public class KernelAPI {
                         socket.close();
                         serverSocket.close();
                         break;
+
+                    } else if (commandPart[0].equals("launch")) {
+                        // Launch:
+                        //  launch name className jarPath synclaunch args...
+
+                        String name = commandPart[1];
+                        String className = commandPart[2];
+                        String jar = commandPart[3].equals("_") ? null : commandPart[3];
+                        boolean syncLaunch = commandPart[4].equals("true");
+                        String[] args = Arrays.copyOfRange(commandPart, 5, commandPart.length);
+
+                        ProcLauncher.launch(name, className, jar, args, syncLaunch);
+
                     } else if (command.startsWith("IO:")) {
                         // IO Codes:
                         //   0: stdin
