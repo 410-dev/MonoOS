@@ -52,6 +52,7 @@ public class KernelAPI {
                 if (read > 0) {
 
                     String command = new String(buffer, 0, read);
+                    String[] commandPart = Utils.splitStringBySpaceWithQuotationConsideration(command);
                     if (command.equals("info")) {
                         socket.getOutputStream().write(KernelInfo.main().getBytes());
                     } else if (command.equals("api-close")) {
