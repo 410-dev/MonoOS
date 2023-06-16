@@ -41,6 +41,16 @@ public class NVRAM implements Serializable {
         getSystemNVRAM().setData(key, value);
     }
 
+    protected static void set(String data) {
+        if (data.contains("=")) {
+            String key = data.substring(0, data.indexOf("="));
+            data = data.substring(data.indexOf("=") + 1);
+            set(key, data);
+        }else{
+            set(data, "");
+        }
+    }
+
     protected static String getParameter(String[] args, String key) {
         boolean found = false;
         for (String arg : args) {
