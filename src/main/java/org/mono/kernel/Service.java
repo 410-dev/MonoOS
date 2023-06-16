@@ -14,13 +14,13 @@ import java.net.URLClassLoader;
 public class Service implements Serializable {
 
     private int pid;
-    private final String name;
+    @Getter private final String name;
     private final String type;
-    private final String description;
+    @Getter private final String description;
     @Getter private final String className;
     private final String methodName;
-    private final String[] arguments;
-    private final File serviceFile;
+    @Getter private final String[] arguments;
+    @Getter private final File serviceFile;
     private final boolean isKernelService;
     private final boolean enforceSync;
     private final boolean requireAlive;
