@@ -25,6 +25,11 @@ public class Boot {
             NVRAM.setSystemNVRAM((NVRAM) ObjectIO.read(new File(Objects.requireNonNull(NVRAM.getParameter(args, "--nvram")))));
         }
 
+        // Set Bootloader info to NVRAM
+        NVRAM.set("BOOTLOADER_NAME", "Built-in STG2 bootloader");
+        NVRAM.set("BOOTLOADER_VERS", "0.0.1");
+        NVRAM.set("BOOTLOADER_AUTH", "410-dev");
+
         // Push boot arguments to nvram
         for (String arg : args) {
             NVRAM.set(arg);
