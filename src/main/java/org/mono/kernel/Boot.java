@@ -32,6 +32,7 @@ public class Boot {
 
         // Add session UID
         NVRAM.set("sys_session", String.valueOf(System.currentTimeMillis()));
+        NVRAM.set("--verbose");
 
         // Load root directory
         if (NVRAM.getParameter(args, "--root") == null) {
