@@ -33,5 +33,12 @@
             <scope>system</scope>
             <systemPath>/Volumes/Codespace/libhy/libhy.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>org.mono</groupId>
+            <artifactId>MonoKernelDirectAPI</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>/Volumes/Codespace/MonoOSPlus/monokernel-direct-api.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
