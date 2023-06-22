@@ -107,7 +107,7 @@ public class Shell {
     private static Object inputObject = null;
     public static void println(String s) {
         if (printerObject == null) {
-            printerObject = ServicesManager.getServiceByType("io_stdout").loadObject();
+            printerObject = ServicesManager.getServiceByType("stdout").loadObject();
         }
         try {
             printerObject.getClass().getDeclaredMethod("println", String.class).invoke(null, s);
@@ -118,7 +118,7 @@ public class Shell {
 
     public static void print(String s) {
         if (printerObject == null) {
-            printerObject = ServicesManager.getServiceByType("io_stdout").loadObject();
+            printerObject = ServicesManager.getServiceByType("stdout").loadObject();
         }
         try {
             printerObject.getClass().getDeclaredMethod("print", String.class).invoke(null, s);
@@ -129,7 +129,7 @@ public class Shell {
 
     public static String readLine(String prompt) {
         if (inputObject == null) {
-            inputObject = ServicesManager.getServiceByType("io_stdin").loadObject();
+            inputObject = ServicesManager.getServiceByType("stdin").loadObject();
         }
         try {
             return (String) inputObject.getClass().getDeclaredMethod("readLine", String.class).invoke(null, prompt);

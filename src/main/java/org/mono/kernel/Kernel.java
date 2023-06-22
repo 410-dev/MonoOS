@@ -24,9 +24,9 @@ public class Kernel {
         Service nvram = new Service("On-FS NVRAM", "dummy-nvram", "NVRAM manager", "", "", null, null, true, true, true);
         Service init = new Service("ServicesManager", "dummy-init", "Process launching utility", "", "", null, null, true, true, true);
         Service framework = new Service("ServicesManager", "dummy-framework", "Process management utility", "", "", null, null, true, true, true);
-        Service io_stdout = new Service("BasicIO_StandardOut", "io_stdout","Standard output", "org.mono.kernel.io.ScreenOutput", "main", null, null, true, false, false);
-        Service io_stderr = new Service("BasicIO_StandardErr", "io_stderr","Standard error", "org.mono.kernel.io.ScreenOutput", "main", null, null, true, false, false);
-        Service io_stdin = new Service("BasicIO_StandardIn", "io_stdin","Standard input", "org.mono.kernel.io.KeyboardStdinAdapter", "main", null, null, true, false, false);
+        Service stdout = new Service("BasicIO_StandardOut", "stdout","Standard output", "org.mono.kernel.io.ScreenOutput", "main", null, null, true, false, false);
+        Service stderr = new Service("BasicIO_StandardErr", "stderr","Standard error", "org.mono.kernel.io.ScreenOutput", "main", null, null, true, false, false);
+        Service stdin = new Service("BasicIO_StandardIn", "stdin","Standard input", "org.mono.kernel.io.KeyboardStdinAdapter", "main", null, null, true, false, false);
         Service environment = new Service("Environment", "dummy-env", "Environment variables and designated paths", "", "", null, null, true, true, true);
         Service shell = new Service("Shell", "shell", "Internal linux-like shell", "org.mono.userspace.Shell", "main", null, null, true, false, true);
         Service basicUI = new Service("BasicShellUI", "ui","Internal fallback UI with direct kernel communication", "org.mono.userspace.BasicShellUI", "main", null, null, true, false, true);
@@ -34,9 +34,9 @@ public class Kernel {
         ServicesManager.registerService(nvram, verbose);
         ServicesManager.registerService(init, verbose);
         ServicesManager.registerService(framework, verbose);
-        ServicesManager.registerService(io_stdout, verbose);
-        ServicesManager.registerService(io_stderr, verbose);
-        ServicesManager.registerService(io_stdin, verbose);
+        ServicesManager.registerService(stdout, verbose);
+        ServicesManager.registerService(stderr, verbose);
+        ServicesManager.registerService(stdin, verbose);
         ServicesManager.registerService(environment, verbose);
         ServicesManager.registerService(shell, verbose);
         ServicesManager.registerService(basicUI, verbose);
@@ -65,7 +65,7 @@ public class Kernel {
         }
 
         // Cache output driver
-        Method out = ServicesManager.getServiceByType("io_stdout").loadObject().getClass().getDeclaredMethod("println", String.class);
+        Method out = ServicesManager.getServiceByType("stdout").loadObject().getClass().getDeclaredMethod("println", String.class);
 
         // Start all services
         ServicesManager.startServices(verbose);

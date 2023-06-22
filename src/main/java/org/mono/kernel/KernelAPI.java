@@ -86,13 +86,13 @@ public class KernelAPI {
                         String id = command.substring("IO:".length());
                         switch (id) {
                             case "0":
-                                socket.getOutputStream().write(ServicesManager.getServiceByType("io_stdin").getClassName().getBytes());
+                                socket.getOutputStream().write(ServicesManager.getServiceByType("stdin").getClassName().getBytes());
                                 break;
                             case "1":
-                                socket.getOutputStream().write(ServicesManager.getServiceByType("io_stdout").getClassName().getBytes());
+                                socket.getOutputStream().write(ServicesManager.getServiceByType("stdout").getClassName().getBytes());
                                 break;
                             case "2":
-                                socket.getOutputStream().write(ServicesManager.getServiceByType("io_stderr").getClassName().getBytes());
+                                socket.getOutputStream().write(ServicesManager.getServiceByType("stderr").getClassName().getBytes());
                                 break;
                             default:
                                 socket.getOutputStream().write("".getBytes());

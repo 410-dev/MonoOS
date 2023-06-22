@@ -19,7 +19,7 @@ public class KeyboardStdinAdapter {
 
     public static String readLine(String prompt) {
         try {
-            ServicesManager.getServiceByType("io_stdout").loadObject().getClass().getDeclaredMethod("print", String.class).invoke(null, prompt);
+            ServicesManager.getServiceByType("stdout").loadObject().getClass().getDeclaredMethod("print", String.class).invoke(null, prompt);
         }catch (Exception e) {
             e.printStackTrace();
         }
