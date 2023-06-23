@@ -41,17 +41,6 @@ public class Kernel {
         ServicesManager.registerService(shell, verbose);
         ServicesManager.registerService(basicUI, verbose);
 
-        // Load all services in root/sys/services
-        // The file name shouldn't start with dot, and the file name should end with .service
-        ScreenOutput.println("Loading services...");
-        FilenameFilter serviceFilter = (dir, name) -> !name.startsWith(".") && name.endsWith(".service");
-        File[] serviceFiles = new File(root.getAbsolutePath() + Environment.KERNEL_SERVICES.replace("/", File.separator)).listFiles(serviceFilter);
-        if (serviceFiles != null) {
-            for (File serviceFile : serviceFiles) {
-                ServicesManager.registerService(serviceFile, verbose);
-            }
-        }
-
         // Load drivers if exists
         ScreenOutput.println("Loading hardware extensions...");
         FilenameFilter extFilters = (dir, name) -> !name.startsWith(".") && name.endsWith(".ext");
@@ -66,6 +55,19 @@ public class Kernel {
 
         // Cache output driver
         Method out = ServicesManager.getServiceByType("stdout").loadObject().getClass().getDeclaredMethod("println", String.class);
+
+        // Load all services in root/sys/services
+        // The file name shouldn't start with dot, and the file name should end with .service
+        ScreenOutput.println("Loading services...");
+        FilenameFilter serviceFilter = (dir, name) -> !name.startsWith(".") && name.endsWith(".service");
+        File[] serviceFiles = new File(root.getAbsolutePath() + Environment.KERNEL_SERVICES.replace("/", File.separator)).listFiles(serviceFilter);
+        if (serviceFiles != null) {
+            for (File serviceFile : serviceFiles) {
+                ServicesManager.registerService(serviceFile, verbose);
+            }
+        }else{
+            ScreenOutput.println("No services found.");
+        }
 
         // Start all services
         ServicesManager.startServices(verbose);
