@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="monosys.jar">
-    <output-path>$PROJECT_DIR$/</output-path>
+    <output-path>$PROJECT_DIR$/sys/</output-path>
     <root id="archive" name="monosys.jar">
       <element id="module-output" name="MonoOS" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/mariadb/jdbc/mariadb-java-client/3.1.1/mariadb-java-client-3.1.1.jar" path-in-jar="/" />
