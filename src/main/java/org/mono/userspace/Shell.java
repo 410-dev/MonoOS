@@ -6,11 +6,7 @@ import org.mono.kernel.kernel.ProcLauncher;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Shell {
 
@@ -84,23 +80,6 @@ public class Shell {
             println("Error: " + e.getMessage());
         }
         return false;
-    }
-
-    public static String kernelAPI(String command) {
-        try (Socket ksock = new Socket("localhost", 65531)) {
-            // Send kernel to stop or restart
-            ksock.getOutputStream().write(command.getBytes());
-            ksock.getOutputStream().flush();
-            byte[] kernbuffer = new byte[1024];
-            int kernresp = ksock.getInputStream().read(kernbuffer);
-            if (kernresp > 0) {
-                return new String(kernbuffer, 0, kernresp);
-            }
-        } catch (Exception e) {
-            println("Failed!");
-            println("Error: " + e.getMessage());
-        }
-        return null;
     }
 
     private static Object printerObject = null;

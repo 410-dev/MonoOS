@@ -14,11 +14,6 @@ public class Kernel {
 
         boolean verbose = NVRAM.get("--verbose") != null;
 
-        // Start Kernel API
-        ScreenOutput.println("Starting Kernel API...");
-        Thread kernelAPIThread = new Thread(KernelAPI::startListenAPI);
-        kernelAPIThread.start();
-
         // Register basic services
         Service kernel = new Service("Mono Basis Framework", "dummy-kern", "Kernel that drives MonoOS", "", "", null, null, true, true, true);
         Service nvram = new Service("On-FS NVRAM", "dummy-nvram", "NVRAM manager", "", "", null, null, true, true, true);
@@ -85,52 +80,34 @@ public class Kernel {
             case 0:
                 // Shutdown
                 out.invoke(null,"Shutting down...");
-                stopSequence(kernelAPIThread);
+                stopSequence();
                 System.exit(0);
             case 1:
                 // Reboot
                 out.invoke(null,"Rebooting...");
-                stopSequence(kernelAPIThread);
+                stopSequence();
                 Boot.main(args);
             case 2:
                 // Halt
                 out.invoke(null,"Halting...");
-                stopSequence(kernelAPIThread);
+                stopSequence();
                 System.exit(0);
             case 3:
                 // Panic
                 out.invoke(null,"Panic!");
-                stopSequence(kernelAPIThread);
+                stopSequence();
                 System.exit(1);
 
             default:
                 // Unknown exit code
                 out.invoke(null,"Unknown exit code: " + exitCode);
-                stopSequence(kernelAPIThread);
+                stopSequence();
                 System.exit(1);
         }
     }
 
 
-    private static void stopSequence(Thread kernelAPIThread) {
+    private static void stopSequence() {
         ServicesManager.stopServices(NVRAM.get("--verbose") != null);
-        ScreenOutput.println("Stopping kernel API...");
-        try (Socket ksock = new Socket("localhost", 65531)) {
-            // Send kernel to stop or restart
-            ksock.getOutputStream().write("api-close".getBytes());
-            ksock.getOutputStream().flush();
-            byte[] kernbuffer = new byte[1024];
-            int kernresp = ksock.getInputStream().read(kernbuffer);
-            if (kernresp > 0) {
-                String output = new String(kernbuffer, 0, kernresp);
-                if (output.equals("ok")) {
-                    ScreenOutput.println("Kernel API successfully closed.");
-                    kernelAPIThread.interrupt();
-                }
-            }
-        }catch (Exception e) {
-            e.printStackTrace();
-            System.exit(9);
-        }
     }
 }
