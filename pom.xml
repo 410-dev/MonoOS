@@ -38,7 +38,7 @@
             <artifactId>MonoKernelDirectAPI</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>/Volumes/Codespace/MonoOSPlus/monokernel-direct-api.jar</systemPath>
+            <systemPath>/Volumes/Codespace/MonoOS/MonoOS-modules/monokernel-direct-api.jar</systemPath>
         </dependency>
     </dependencies>
 </project>
