@@ -38,7 +38,7 @@ public class ServicesManager {
                         serviceMeta.get("className").getAsString(), // This field is the only required field for json data.
                         serviceMeta.has("methodName") ? serviceMeta.get("methodName").getAsString() : "main",
                         Utils.splitStringBySpaceWithQuotationConsideration(serviceMeta.get("arguments").getAsString()),
-                        serviceMeta.has ("file") ? new File(serviceMetaFile.getParent(), serviceMeta.get("file").getAsString()) : new File(serviceMetaFile.getParent(), serviceMetaFile.getName().substring(0, serviceMetaFile.getName().lastIndexOf(".")) + ".jar"),
+                        serviceMeta.has("file") ? new File(serviceMetaFile.getParent(), serviceMeta.get("file").getAsString().replace("/", File.separator)) : new File(serviceMetaFile.getParent(), serviceMetaFile.getName().substring(0, serviceMetaFile.getName().lastIndexOf(".")) + ".jar"),
                         serviceMeta.has("isKernelService") && serviceMeta.get("isKernelService").getAsBoolean(),
                         serviceMeta.has("enforceSync") && serviceMeta.get("enforceSync").getAsBoolean(),
                         serviceMeta.has("requireAlive") && serviceMeta.get("requireAlive").getAsBoolean()

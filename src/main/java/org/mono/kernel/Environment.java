@@ -1,16 +1,17 @@
 package org.mono.kernel;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Environment {
-    public static final String KERNEL_EXTENSIONS = "/sys/kernel/extensions";
-    public static final String KERNEL_SERVICES = "/sys/kernel/services";
+    public static final String KERNEL_EXTENSIONS = "/sys/kernel/extensions".replace("/", File.separator);
+    public static final String KERNEL_SERVICES = "/sys/kernel/services".replace("/", File.separator);
 
 
-    public static final String SYSTEM_LINKS = "/sys/system/links";
+    public static final String SYSTEM_LINKS = "/sys/system/links".replace("/", File.separator);
 
 
-    public static final String USER_LINKS = "$USER_HOME/links";
+    public static final String USER_LINKS = "$USER_HOME/links".replace("/", File.separator);
 
 
     public static final HashMap<String, String> variables = new HashMap<>();
