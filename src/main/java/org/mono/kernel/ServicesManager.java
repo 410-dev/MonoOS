@@ -201,7 +201,7 @@ public class ServicesManager {
         Service s = getServiceByName(name);
         if(s != null){
             if (verbose) ScreenOutput.println("Starting service " + s.getName() + "...");
-            if (s.startJoin()) {
+            if (s.startSync()) {
                 if (verbose) ScreenOutput.println("Service task of " + s.getName() + " ended successfully.");
             } else {
                 if (verbose) ScreenOutput.println("Service task of " + s.getName() + " ended with an error.");
@@ -215,7 +215,7 @@ public class ServicesManager {
         Service s = getServiceByPID(pid);
         if(s != null){
             if (verbose) ScreenOutput.println("Starting service " + s.getName() + "...");
-            if (s.startJoin()) {
+            if (s.startSync()) {
                 if (verbose) ScreenOutput.println("Service task of " + s.getName() + " ended successfully.");
                 return 0;
             } else {
