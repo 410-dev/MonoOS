@@ -1,5 +1,4 @@
 package org.mono.kernel;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -26,6 +25,10 @@ public class Environment {
             if (key.contains(invalidCharacter)) {
                 throw new RuntimeException("Invalid character in variable name: " + invalidCharacter);
             }
+        }
+        if (value == null) {
+            variables.remove(key);
+            return;
         }
         variables.put(key, value);
     }
