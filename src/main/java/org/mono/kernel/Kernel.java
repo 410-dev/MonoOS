@@ -33,8 +33,7 @@ public class Kernel {
         ServicesManager.registerService(stderr, verbose);
         ServicesManager.registerService(stdin, verbose);
         ServicesManager.registerService(environment, verbose);
-        ServicesManager.registerService(shell, verbose);
-        ServicesManager.registerService(basicUI, verbose);
+
 
         // Load drivers if exists
         ScreenOutput.println("Loading hardware extensions...");
@@ -67,13 +66,17 @@ public class Kernel {
         // Start all services
         ServicesManager.startServices(verbose);
 
+        // Start UI services
+        ServicesManager.startAsyncService(ServicesManager.registerService(shell, verbose), verbose);
+        ServicesManager.startAsyncService(ServicesManager.registerService(basicUI, verbose), verbose);
+
         // Start kernel console
         // Exit codes:
         //   0: Shutdown
         //   1: Reboot
         //   2: Halt
         //   3: Panic
-        out.invoke(null,"Starting kernel...");
+        out.invoke(null,"Starting kernel controls...");
         int exitCode = KernelAPI.startListenSystemControls();
 
         switch (exitCode) {
