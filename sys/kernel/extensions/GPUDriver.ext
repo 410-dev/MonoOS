@@ -1,0 +1,12 @@
+{
+    "name": "GPUDriver",
+    "type": "driver-gpu",
+    "description": "Host machine display driver",
+    "className": "org.mono.kernel.drivers.GPUDriver",
+    "methodName": "main",
+    "arguments": "",
+    "file": "bin/GPUDriver.jar",
+    "isKernelService": true,
+    "enforceSync": false,
+    "requireAlive": false
+}
