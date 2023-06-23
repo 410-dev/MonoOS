@@ -1,0 +1,12 @@
+{
+    "name": "MonoDesktopMgr",
+    "type": "service",
+    "description": "MonoDesktopMgr",
+    "className": "org.mono.userspace.Mdmgr",
+    "methodName": "main",
+    "arguments": "",
+    "file": "bin/MonoDesktopMgr.jar",
+    "isKernelService": true,
+    "enforceSync": true,
+    "requireAlive": false
+}

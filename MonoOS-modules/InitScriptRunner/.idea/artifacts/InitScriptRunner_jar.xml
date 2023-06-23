@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="InitScriptRunner:jar">
+    <output-path>$PROJECT_DIR$/../../sys/kernel/services/bin</output-path>
+    <root id="archive" name="InitScriptRunner.jar">
+      <element id="module-output" name="InitScriptRunner" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../../libhy/libhy.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../monokernel-direct-api.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

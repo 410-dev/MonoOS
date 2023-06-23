@@ -1,0 +1,12 @@
+{
+    "name": "InitScriptRunner",
+    "type": "service",
+    "description": "Runs shell scripts at boot time",
+    "className": "org.mono.userspace.InitScriptRunner",
+    "methodName": "main",
+    "arguments": "",
+    "file": "bin/InitScriptRunner.jar",
+    "isKernelService": true,
+    "enforceSync": true,
+    "requireAlive": false
+}
