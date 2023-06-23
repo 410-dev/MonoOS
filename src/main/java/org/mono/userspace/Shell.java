@@ -1,9 +1,14 @@
 package org.mono.userspace;
 
 import me.hysong.libhyextended.Utils;
+import org.mono.kernel.Environment;
+import org.mono.kernel.NVRAM;
 import org.mono.kernel.ServicesManager;
 import org.mono.kernel.kernel.ProcLauncher;
+import org.mono.userspace.busybox.Declare;
 
+import java.io.File;
+import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
@@ -15,6 +20,11 @@ public class Shell {
     // Start listening for commands in port 65532 via socket. Usage is exactly same as linux shells.
     public int main(String[] args) {
         int exitCode = 2;
+
+        // Export PATH variable
+        org.mono.userspace.busybox.Declare declare = new Declare();
+        declare.main(new String[]{"PATH", "/bin:/data/bin:/sys/bin".replace("/", File.separator)});
+
         try {
             ServerSocket serverSocket = new ServerSocket(65532);
             Socket socket = serverSocket.accept();
@@ -37,7 +47,7 @@ public class Shell {
                         }
 
                     // Find command in userspace.busybox package and execute it
-                    // TODO: If not found, try finding from disk drive (.jar file) and execute it
+                    // If not found, try finding from disk drive (.jar file) and execute it
                     } else {
                         try {
                             String className = commandParts[0].substring(0, 1).toUpperCase() + commandParts[0].substring(1).toLowerCase();
@@ -46,7 +56,20 @@ public class Shell {
                             processExitCode = ProcLauncher.launch(commandParts[0], processClass.getName(), "_", Arrays.copyOfRange(commandParts, 1, commandParts.length), true);
 
                         } catch (ClassNotFoundException e) {
-                            println("Unknown command: " + commandParts[0]);
+                            Class<?> environment = Class.forName("org.mono.kernel.Environment");
+                            String[] paths = environment.getDeclaredMethod("get", String.class).invoke(null, "PATH").toString().split(":");
+                            boolean found = false;
+                            for (String path : paths) {
+                                File file = new File(NVRAM.get("root") + path + File.separator + commandParts[0] + ".jar");
+                                if (file.isFile()) {
+                                    processExitCode = ProcLauncher.launch(commandParts[0], "org.mono.userspace." + commandParts[0].substring(0,1).toUpperCase() + commandParts[0].substring(1), file.getAbsolutePath(), Arrays.copyOfRange(commandParts, 1, commandParts.length), true);
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                println("Command not found: " + commandParts[0]);
+                            }
                         }
                     }
                     socket.getOutputStream().write(String.valueOf(processExitCode).getBytes());
