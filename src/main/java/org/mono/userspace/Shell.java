@@ -117,4 +117,14 @@ public class Shell {
         }
         return null;
     }
+
+    public static String substituteEnvVar(String toSubstitute) {
+        try {
+            Class<?> environment = Class.forName("org.mono.kernel.Environment");
+            return (String) environment.getDeclaredMethod("substituteInLineVariable", String.class).invoke(null, toSubstitute);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
