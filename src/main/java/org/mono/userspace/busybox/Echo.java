@@ -8,6 +8,7 @@ public class Echo {
         for (String arg : args) {
             result += arg + " ";
         }
+        result = Shell.substituteEnvVar(result);
         Shell.println(result);
         return 0;
     }
